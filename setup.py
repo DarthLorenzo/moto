@@ -6,6 +6,7 @@ install_requires = [
     "Jinja2",
     "boto>=2.36.0",
     "httpretty==0.8.10",
+    "flask",
     "requests",
     "xmltodict",
     "six",
@@ -21,7 +22,7 @@ extras_require = {
 
 setup(
     name='moto',
-    version='0.4.27',
+    version='0.4.28',
     description='A library that allows your python tests to easily'
                 ' mock out the boto library',
     author='Steve Pulec',

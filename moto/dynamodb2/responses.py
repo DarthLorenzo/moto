@@ -5,6 +5,7 @@ import six
 from moto.core.responses import BaseResponse
 from moto.core.utils import camelcase_to_underscores
 from .models import dynamodb_backend2, dynamo_json_dump
+from .utils import parse_filter_expression
 
 
 GET_SESSION_TOKEN_RESULT = """
@@ -348,10 +349,17 @@ class DynamoHandler(BaseResponse):
         filters = {}
         scan_filters = self.body.get('ScanFilter', {})
         for attribute_name, scan_filter in scan_filters.items():
-            # Keys are attribute names. Values are tuples of (comparison, comparison_value)
+            # Keys are attribute names. Values are tuples of (comparison, comparison_values)
             comparison_operator = scan_filter["ComparisonOperator"]
             comparison_values = scan_filter.get("AttributeValueList", [])
             filters[attribute_name] = (comparison_operator, comparison_values)
+
+        # {"FilterExpression": "#n0 = :v0", "ExpressionAttributeValues": {":v0": {"BOOL": false}}, "ExpressionAttributeNames": {"#n0": "ready"}}
+        filter_expression = self.body.get('FilterExpression', '')
+        if filter_expression:
+            filters.update(parse_filter_expression(filter_expression,
+                                                   self.body['ExpressionAttributeNames'],
+                                                   self.body['ExpressionAttributeValues']))
 
         exclusive_start_key = self.body.get('ExclusiveStartKey')
         limit = self.body.get("Limit")
